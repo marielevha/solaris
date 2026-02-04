@@ -154,6 +154,7 @@ export default function Home() {
 
   const energyLoadDisplay = formatEnergy(energyLoad.totalWh);
   const energyProducedDisplay = formatEnergy(energyProduced);
+  const hasResults = energyLoad.totalWh > 0;
   const voltageWarning =
     voltageMode === "manual" &&
     isManualVoltageLow(powerTotal.totalW, manualVoltage);
@@ -432,16 +433,48 @@ export default function Home() {
           <button
             type="button"
             onClick={() => duplicateEquipment(equipment.id)}
-            className="btn-secondary"
+            className="btn-secondary inline-flex h-9 w-9 items-center justify-center"
+            title="Dupliquer"
+            aria-label="Dupliquer"
           >
-            Dupliquer
+            <svg
+              aria-hidden="true"
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="9" y="9" width="10" height="10" rx="2" />
+              <rect x="5" y="5" width="10" height="10" rx="2" />
+            </svg>
+            <span className="sr-only">Dupliquer</span>
           </button>
           <button
             type="button"
             onClick={() => removeEquipment(equipment.id)}
-            className="btn-secondary text-rose-600"
+            className="btn-secondary inline-flex h-9 w-9 items-center justify-center text-rose-600"
+            title="Supprimer"
+            aria-label="Supprimer"
           >
-            Supprimer
+            <svg
+              aria-hidden="true"
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 7h16" />
+              <path d="M9 7V5h6v2" />
+              <rect x="7" y="7" width="10" height="12" rx="2" />
+              <path d="M10 11v5M14 11v5" />
+            </svg>
+            <span className="sr-only">Supprimer</span>
           </button>
         </div>
       </td>
@@ -824,166 +857,172 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="card">
-            <div className="card-header">
-              <h2 className="card-title">Actions</h2>
-            </div>
-            <div className="card-body flex flex-wrap gap-3">
-              <button type="button" onClick={handleCopy} className="btn-primary">
-                Copier le résumé
-              </button>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="btn-secondary"
-              >
-                Exporter (imprimer)
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="btn-secondary text-rose-600"
-              >
-                Reset
-              </button>
-            </div>
-          </section>
         </div>
 
-        <aside className="card h-fit border-emerald-100 bg-white lg:sticky lg:top-6">
-          <div className="card-header border-b border-emerald-100">
-            <h2 className="card-title">Résultats</h2>
-            <p className="text-xs text-slate-500">
-              Calculs mis à jour en temps réel.
-            </p>
-          </div>
-          <div className="card-body flex flex-col gap-4">
-            <div className="grid gap-3">
-              <div>
-                <p className="text-xs uppercase text-slate-400">Énergie consommée</p>
-                <p className="text-lg font-semibold text-slate-900">
-                  {energyLoadDisplay.wh} Wh/j ({energyLoadDisplay.kwh} kWh/j)
-                </p>
+        <aside className="flex h-fit flex-col gap-6 lg:sticky lg:top-6">
+          {hasResults && (
+            <section className="card border-slate-200 bg-white">
+              <div className="card-header">
+                <h2 className="card-title">Actions</h2>
               </div>
-              <div>
-                <p className="text-xs uppercase text-slate-400">Énergie à produire</p>
-                <p className="text-lg font-semibold text-slate-900">
-                  {energyProducedDisplay.wh} Wh/j ({energyProducedDisplay.kwh} kWh/j)
-                </p>
+              <div className="card-body flex flex-wrap justify-end gap-3">
+                <button type="button" onClick={handleCopy} className="btn-primary">
+                  Copier le résumé
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="btn-secondary"
+                >
+                  Exporter (imprimer)
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="btn-secondary text-rose-600"
+                >
+                  Reset
+                </button>
               </div>
-              <div>
-                <p className="text-xs uppercase text-slate-400">Puissance totale</p>
-                <p className="text-lg font-semibold text-slate-900">
-                  {formatNumber(powerTotal.totalW)} W
-                </p>
-              </div>
-              <div>
-                <p className="text-xs uppercase text-slate-400">Tension système</p>
-                <p className="text-lg font-semibold text-slate-900">
-                  {systemVoltage} V
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-sm font-semibold text-slate-700">Batteries</h3>
-              <p className="text-lg font-semibold text-slate-900">
-                {formatNumber(batteryBank.requiredAh)} Ah
+            </section>
+          )}
+          <section className="card border-emerald-100 bg-white">
+            <div className="card-header border-b border-emerald-100">
+              <h2 className="card-title">Résultats</h2>
+              <p className="text-xs text-slate-500">
+                Calculs mis à jour en temps réel.
               </p>
-              {isBatteryCompatible ? (
+            </div>
+            <div className="card-body flex flex-col gap-4">
+              <div className="grid gap-3">
+                <div>
+                  <p className="text-xs uppercase text-slate-400">Énergie consommée</p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    {energyLoadDisplay.wh} Wh/j ({energyLoadDisplay.kwh} kWh/j)
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-slate-400">Énergie à produire</p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    {energyProducedDisplay.wh} Wh/j ({energyProducedDisplay.kwh} kWh/j)
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-slate-400">Puissance totale</p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    {formatNumber(powerTotal.totalW)} W
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-slate-400">Tension système</p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    {systemVoltage} V
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <h3 className="text-sm font-semibold text-slate-700">Batteries</h3>
+                <p className="text-lg font-semibold text-slate-900">
+                  {formatNumber(batteryBank.requiredAh)} Ah
+                </p>
+                {isBatteryCompatible ? (
+                  <p className="text-xs text-slate-600">
+                    {seriesParallel.seriesCount} en série ×{" "}
+                    {seriesParallel.parallelCount} en parallèle ={" "}
+                    {seriesParallel.totalBatteries} batteries
+                  </p>
+                ) : (
+                  <p className="text-xs text-rose-600">
+                    La tension système ({systemVoltage} V) doit être un multiple de{" "}
+                    {battery.batteryVoltage} V. Suggestions :{" "}
+                    {compatibleVoltages.join(" / ")} V.
+                  </p>
+                )}
+              </div>
+
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <h3 className="text-sm font-semibold text-slate-700">Panneaux PV</h3>
+                <p className="text-lg font-semibold text-slate-900">
+                  {formatNumber(pvSizing.pvPowerWp)} Wp
+                </p>
                 <p className="text-xs text-slate-600">
-                  {seriesParallel.seriesCount} en série × {seriesParallel.parallelCount} en parallèle = {seriesParallel.totalBatteries} batteries
+                  {pvSizing.moduleCount} modules × {pv.modulePowerWp} Wp ={" "}
+                  {formatNumber(pvSizing.installedPowerWp)} Wp installés
                 </p>
-              ) : (
-                <p className="text-xs text-rose-600">
-                  La tension système ({systemVoltage} V) doit être un multiple de {battery.batteryVoltage} V.
-                  Suggestions : {compatibleVoltages.join(" / ")} V.
-                </p>
-              )}
-            </div>
-
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-sm font-semibold text-slate-700">Panneaux PV</h3>
-              <p className="text-lg font-semibold text-slate-900">
-                {formatNumber(pvSizing.pvPowerWp)} Wp
-              </p>
-              <p className="text-xs text-slate-600">
-                {pvSizing.moduleCount} modules × {pv.modulePowerWp} Wp = {formatNumber(
-                  pvSizing.installedPowerWp,
-                )} Wp installés
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-sm font-semibold text-slate-700">Régulateur</h3>
-              <p className="text-lg font-semibold text-slate-900">
-                {controller.type} · {formatNumber(controllerSizing.recommendedCurrentA)} A
-              </p>
-              <p className="text-xs text-slate-600">
-                Palier recommandé : {controllerSizing.standardCurrentA} A
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-sm font-semibold text-slate-700">Onduleur</h3>
-              <p className="text-lg font-semibold text-slate-900">
-                {formatNumber(inverterSizing.recommendedPowerW)} W
-              </p>
-              <p className="text-xs text-slate-600">Pur sinus recommandé.</p>
-            </div>
-
-            <details className="rounded-lg border border-slate-200 bg-white p-4">
-              <summary className="cursor-pointer text-sm font-semibold text-slate-700">
-                Détails des calculs
-              </summary>
-              <div className="mt-3 space-y-3 text-xs text-slate-600">
-                <div>
-                  <p className="font-semibold">Énergie consommée</p>
-                  <p>E = Σ(P × h × Qté) = {energyLoadDisplay.wh} Wh/j</p>
-                </div>
-                <div>
-                  <p className="font-semibold">Énergie à produire</p>
-                  {losses.mode === "simple" ? (
-                    <p>
-                      E_prod = E_load × (1 + pertes%) = {energyProducedDisplay.wh} Wh/j
-                    </p>
-                  ) : (
-                    <p>
-                      E_prod = E_load / (η_inv × η_reg × (1 - L_cable) × (1 - L_temp))
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <p className="font-semibold">Batteries</p>
-                  <p>
-                    C_bank = (E_prod × Autonomie) / (V_sys × DoD)
-                  </p>
-                </div>
-                <div>
-                  <p className="font-semibold">PV</p>
-                  <p>
-                    P_pv = (E_prod / PSH) × (1 + oversize%) = {formatNumber(
-                      pvSizing.pvPowerWp,
-                    )} Wp
-                  </p>
-                </div>
-                <div>
-                  <p className="font-semibold">Régulateur</p>
-                  <p>
-                    I = P_inst / V_sys × 1.25 = {formatNumber(
-                      controllerSizing.recommendedCurrentA,
-                    )} A
-                  </p>
-                </div>
-                <div>
-                  <p className="font-semibold">Onduleur</p>
-                  <p>
-                    P_inv = max(P_total × (1 + marge), P_surge)
-                  </p>
-                </div>
               </div>
-            </details>
-          </div>
+
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <h3 className="text-sm font-semibold text-slate-700">Régulateur</h3>
+                <p className="text-lg font-semibold text-slate-900">
+                  {controller.type} ·{" "}
+                  {formatNumber(controllerSizing.recommendedCurrentA)} A
+                </p>
+                <p className="text-xs text-slate-600">
+                  Palier recommandé : {controllerSizing.standardCurrentA} A
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <h3 className="text-sm font-semibold text-slate-700">Onduleur</h3>
+                <p className="text-lg font-semibold text-slate-900">
+                  {formatNumber(inverterSizing.recommendedPowerW)} W
+                </p>
+                <p className="text-xs text-slate-600">Pur sinus recommandé.</p>
+              </div>
+
+              <details className="rounded-lg border border-slate-200 bg-white p-4">
+                <summary className="cursor-pointer text-sm font-semibold text-slate-700">
+                  Détails des calculs
+                </summary>
+                <div className="mt-3 space-y-3 text-xs text-slate-600">
+                  <div>
+                    <p className="font-semibold">Énergie consommée</p>
+                    <p>E = Σ(P × h × Qté) = {energyLoadDisplay.wh} Wh/j</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Énergie à produire</p>
+                    {losses.mode === "simple" ? (
+                      <p>
+                        E_prod = E_load × (1 + pertes%) ={" "}
+                        {energyProducedDisplay.wh} Wh/j
+                      </p>
+                    ) : (
+                      <p>
+                        E_prod = E_load / (η_inv × η_reg × (1 - L_cable) × (1 - L_temp))
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold">Batteries</p>
+                    <p>
+                      C_bank = (E_prod × Autonomie) / (V_sys × DoD)
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">PV</p>
+                    <p>
+                      P_pv = (E_prod / PSH) × (1 + oversize%) ={" "}
+                      {formatNumber(pvSizing.pvPowerWp)} Wp
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Régulateur</p>
+                    <p>
+                      I = P_inst / V_sys × 1.25 ={" "}
+                      {formatNumber(controllerSizing.recommendedCurrentA)} A
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Onduleur</p>
+                    <p>
+                      P_inv = max(P_total × (1 + marge), P_surge)
+                    </p>
+                  </div>
+                </div>
+              </details>
+            </div>
+          </section>
         </aside>
       </main>
 
