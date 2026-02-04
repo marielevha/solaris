@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { FiCopy, FiTrash2 } from "react-icons/fi";
 import { z } from "zod";
 import {
   computeBatteryBank,
@@ -52,6 +53,16 @@ const toNumber = (value: string) => {
   const parsed = Number(value);
   return Number.isNaN(parsed) ? 0 : parsed;
 };
+
+const InfoBubble = ({ label }: { label: string }) => (
+  <span
+    className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-500"
+    title={label}
+    aria-label={label}
+  >
+    ?
+  </span>
+);
 
 export default function Home() {
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -250,7 +261,10 @@ export default function Home() {
       return (
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-            Marge pertes (%)
+            <span className="inline-flex items-center gap-2">
+              Marge pertes (%)
+              <InfoBubble label="Ajout forfaitaire pour couvrir les pertes globales." />
+            </span>
             <input
               type="number"
               min={10}
@@ -273,7 +287,10 @@ export default function Home() {
     return (
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Rendement onduleur (%)
+          <span className="inline-flex items-center gap-2">
+            Rendement onduleur (%)
+            <InfoBubble label="Efficacité moyenne de l'onduleur." />
+          </span>
           <input
             type="number"
             min={0}
@@ -293,7 +310,10 @@ export default function Home() {
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Rendement régulateur (%)
+          <span className="inline-flex items-center gap-2">
+            Rendement régulateur (%)
+            <InfoBubble label="Efficacité moyenne du régulateur." />
+          </span>
           <input
             type="number"
             min={0}
@@ -313,7 +333,10 @@ export default function Home() {
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Pertes câbles (%)
+          <span className="inline-flex items-center gap-2">
+            Pertes câbles (%)
+            <InfoBubble label="Pertes estimées dans les câbles." />
+          </span>
           <input
             type="number"
             min={0}
@@ -333,7 +356,10 @@ export default function Home() {
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Pertes température (%)
+          <span className="inline-flex items-center gap-2">
+            Pertes température (%)
+            <InfoBubble label="Pertes dues à la température des modules." />
+          </span>
           <input
             type="number"
             min={0}
@@ -437,19 +463,7 @@ export default function Home() {
             title="Dupliquer"
             aria-label="Dupliquer"
           >
-            <svg
-              aria-hidden="true"
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="9" y="9" width="10" height="10" rx="2" />
-              <rect x="5" y="5" width="10" height="10" rx="2" />
-            </svg>
+            <FiCopy className="h-4 w-4" aria-hidden="true" />
             <span className="sr-only">Dupliquer</span>
           </button>
           <button
@@ -459,21 +473,7 @@ export default function Home() {
             title="Supprimer"
             aria-label="Supprimer"
           >
-            <svg
-              aria-hidden="true"
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M4 7h16" />
-              <path d="M9 7V5h6v2" />
-              <rect x="7" y="7" width="10" height="12" rx="2" />
-              <path d="M10 11v5M14 11v5" />
-            </svg>
+            <FiTrash2 className="h-4 w-4" aria-hidden="true" />
             <span className="sr-only">Supprimer</span>
           </button>
         </div>
@@ -517,7 +517,10 @@ export default function Home() {
             </div>
             <div className="card-body grid gap-3 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                PSH (h/j)
+                <span className="inline-flex items-center gap-2">
+                  PSH (h/j)
+                  <InfoBubble label="PSH = Peak Sun Hours : nombre d'heures d'ensoleillement équivalent par jour." />
+                </span>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
@@ -529,12 +532,6 @@ export default function Home() {
                     }
                     className="input w-full"
                   />
-                  <span
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500"
-                    title="PSH = Peak Sun Hours : nombre d'heures d'ensoleillement équivalent par jour."
-                  >
-                    ?
-                  </span>
                 </div>
                 {!isPshValid && (
                   <span className="text-xs text-rose-600">
@@ -570,13 +567,48 @@ export default function Home() {
                 <table className="min-w-[720px] w-full text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                     <tr>
-                      <th className="p-2">Nom</th>
-                      <th className="p-2">Puissance (W)</th>
-                      <th className="p-2">Durée (h/j)</th>
-                      <th className="p-2">Qté</th>
-                      <th className="p-2">Type</th>
-                      <th className="p-2 text-center">Inclure</th>
-                      <th className="p-2 text-right">Actions</th>
+                      <th className="p-2">
+                        <span className="inline-flex items-center gap-2">
+                          Nom
+                          <InfoBubble label="Nom descriptif de l'équipement." />
+                        </span>
+                      </th>
+                      <th className="p-2">
+                        <span className="inline-flex items-center gap-2">
+                          Puissance (W)
+                          <InfoBubble label="Puissance nominale en watts." />
+                        </span>
+                      </th>
+                      <th className="p-2">
+                        <span className="inline-flex items-center gap-2">
+                          Durée (h/j)
+                          <InfoBubble label="Nombre d'heures d'utilisation par jour." />
+                        </span>
+                      </th>
+                      <th className="p-2">
+                        <span className="inline-flex items-center gap-2">
+                          Qté
+                          <InfoBubble label="Quantité d'appareils identiques." />
+                        </span>
+                      </th>
+                      <th className="p-2">
+                        <span className="inline-flex items-center gap-2">
+                          Type
+                          <InfoBubble label="Continu = usage permanent, Intermittent = usage ponctuel." />
+                        </span>
+                      </th>
+                      <th className="p-2 text-center">
+                        <span className="inline-flex items-center gap-2">
+                          Inclure
+                          <InfoBubble label="Inclure l'équipement dans les calculs." />
+                        </span>
+                      </th>
+                      <th className="p-2 text-right">
+                        <span className="inline-flex items-center gap-2">
+                          Actions
+                          <InfoBubble label="Dupliquer ou supprimer la ligne." />
+                        </span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>{equipments.map(renderEquipmentRow)}</tbody>
@@ -682,7 +714,10 @@ export default function Home() {
             </div>
             <div className="card-body grid gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                Autonomie (jours)
+                <span className="inline-flex items-center gap-2">
+                  Autonomie (jours)
+                  <InfoBubble label="Nombre de jours d'autonomie souhaités." />
+                </span>
                 <input
                   type="number"
                   min={1}
@@ -697,7 +732,10 @@ export default function Home() {
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                Profondeur décharge (%)
+                <span className="inline-flex items-center gap-2">
+                  Profondeur décharge (%)
+                  <InfoBubble label="Pourcentage de décharge maximale des batteries." />
+                </span>
                 <input
                   type="number"
                   min={10}
@@ -717,7 +755,10 @@ export default function Home() {
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                Tension batterie unitaire (V)
+                <span className="inline-flex items-center gap-2">
+                  Tension batterie unitaire (V)
+                  <InfoBubble label="Tension nominale d'une batterie individuelle." />
+                </span>
                 <select
                   value={battery.batteryVoltage}
                   onChange={(event) =>
@@ -736,7 +777,10 @@ export default function Home() {
                 </select>
               </label>
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                Capacité batterie unitaire (Ah)
+                <span className="inline-flex items-center gap-2">
+                  Capacité batterie unitaire (Ah)
+                  <InfoBubble label="Capacité d'une batterie en ampères-heures." />
+                </span>
                 <input
                   type="number"
                   min={1}
@@ -754,7 +798,10 @@ export default function Home() {
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                Type de batterie
+                <span className="inline-flex items-center gap-2">
+                  Type de batterie
+                  <InfoBubble label="Technologie de batterie utilisée." />
+                </span>
                 <select
                   value={battery.batteryType}
                   onChange={(event) =>
@@ -779,7 +826,10 @@ export default function Home() {
             </div>
             <div className="card-body grid gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                Puissance module (Wp)
+                <span className="inline-flex items-center gap-2">
+                  Puissance module (Wp)
+                  <InfoBubble label="Puissance crête d'un module photovoltaïque." />
+                </span>
                 <input
                   type="number"
                   min={1}
@@ -794,7 +844,10 @@ export default function Home() {
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                Oversize PV (%)
+                <span className="inline-flex items-center gap-2">
+                  Oversize PV (%)
+                  <InfoBubble label="Surdimensionnement pour couvrir les pertes et variations." />
+                </span>
                 <input
                   type="number"
                   min={0}
@@ -814,7 +867,10 @@ export default function Home() {
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                Type régulateur
+                <span className="inline-flex items-center gap-2">
+                  Type régulateur
+                  <InfoBubble label="Type de contrôleur de charge (MPPT/PWM)." />
+                </span>
                 <select
                   value={controller.type}
                   onChange={(event) =>
@@ -827,7 +883,10 @@ export default function Home() {
                 </select>
               </label>
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                Marge onduleur (%)
+                <span className="inline-flex items-center gap-2">
+                  Marge onduleur (%)
+                  <InfoBubble label="Marge de sécurité sur la puissance de l'onduleur." />
+                </span>
                 <input
                   type="number"
                   min={0}
@@ -852,7 +911,10 @@ export default function Home() {
                     })
                   }
                 />
-                Option "Surge" (frigo, clim)
+                <span className="inline-flex items-center gap-2">
+                  Option "Surge" (frigo, clim)
+                  <InfoBubble label="Active la prise en compte des appels de courant au démarrage." />
+                </span>
               </label>
             </div>
           </section>
