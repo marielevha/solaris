@@ -1,65 +1,1023 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
+import {
+  computeBatteryBank,
+  computeController,
+  computeEnergyLoad,
+  computeEnergyProduced,
+  computeInverter,
+  computePowerTotal,
+  computePV,
+  computeSeriesParallel,
+  getCompatibleSystemVoltages,
+  getSystemVoltageAuto,
+  isManualVoltageLow,
+  SYSTEM_VOLTAGES,
+} from "@/domain/calculations";
+import {
+  BatteryConfig,
+  Equipment,
+  LossesConfig,
+  LossesMode,
+  VoltageMode,
+} from "@/domain/types";
+import {
+  defaultEquipments,
+  exampleEquipments,
+  useSolarStore,
+} from "@/store/solarStore";
+
+const numberFormatter = new Intl.NumberFormat("fr-FR", {
+  maximumFractionDigits: 1,
+});
+
+const formatNumber = (value: number) => numberFormatter.format(value);
+
+const formatEnergy = (valueWh: number) => ({
+  wh: formatNumber(valueWh),
+  kwh: formatNumber(valueWh / 1000),
+});
+
+const clampNumber = (value: number, min: number, max?: number) => {
+  if (Number.isNaN(value)) return min;
+  if (typeof max === "number" && value > max) return max;
+  return value < min ? min : value;
+};
+
+const pshSchema = z.number().positive();
+
+const toNumber = (value: string) => {
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
 
 export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+  const [hasHydrated, setHasHydrated] = useState(false);
+  const {
+    psh,
+    equipments,
+    losses,
+    voltageMode,
+    manualVoltage,
+    battery,
+    pv,
+    controller,
+    inverter,
+    setPsh,
+    setLosses,
+    setVoltageMode,
+    setManualVoltage,
+    setBattery,
+    setPv,
+    setController,
+    setInverter,
+    addEquipment,
+    updateEquipment,
+    removeEquipment,
+    duplicateEquipment,
+    setEquipments,
+    resetAll,
+  } = useSolarStore();
+
+  useEffect(() => {
+    useSolarStore.persist.rehydrate();
+    setHasHydrated(true);
+  }, []);
+
+  const energyLoad = useMemo(() => computeEnergyLoad(equipments), [equipments]);
+  const powerTotal = useMemo(() => computePowerTotal(equipments), [equipments]);
+  const autoVoltage = useMemo(
+    () => getSystemVoltageAuto(powerTotal.totalW),
+    [powerTotal.totalW],
+  );
+  const systemVoltage = voltageMode === "auto" ? autoVoltage : manualVoltage;
+  const energyProduced = useMemo(
+    () => computeEnergyProduced(energyLoad.totalWh, losses),
+    [energyLoad.totalWh, losses],
+  );
+  const batteryBank = useMemo(
+    () =>
+      computeBatteryBank(
+        energyProduced,
+        battery.autonomyDays,
+        systemVoltage,
+        battery.depthOfDischargePercent,
+      ),
+    [
+      battery.autonomyDays,
+      battery.depthOfDischargePercent,
+      energyProduced,
+      systemVoltage,
+    ],
+  );
+  const seriesParallel = useMemo(
+    () =>
+      computeSeriesParallel(
+        systemVoltage,
+        battery.batteryVoltage,
+        batteryBank.requiredAh,
+        battery.batteryCapacityAh,
+      ),
+    [
+      battery.batteryCapacityAh,
+      battery.batteryVoltage,
+      batteryBank.requiredAh,
+      systemVoltage,
+    ],
+  );
+  const pvSizing = useMemo(
+    () =>
+      computePV(
+        energyProduced,
+        psh,
+        pv.oversizePercent,
+        pv.modulePowerWp,
+      ),
+    [energyProduced, psh, pv.modulePowerWp, pv.oversizePercent],
+  );
+  const controllerSizing = useMemo(
+    () => computeController(pvSizing.installedPowerWp, systemVoltage),
+    [pvSizing.installedPowerWp, systemVoltage],
+  );
+  const inverterSizing = useMemo(
+    () =>
+      computeInverter(
+        powerTotal.totalW,
+        inverter.marginPercent,
+        inverter.surgeEnabled,
+        equipments,
+      ),
+    [equipments, inverter.marginPercent, inverter.surgeEnabled, powerTotal.totalW],
+  );
+
+  const energyLoadDisplay = formatEnergy(energyLoad.totalWh);
+  const energyProducedDisplay = formatEnergy(energyProduced);
+  const voltageWarning =
+    voltageMode === "manual" &&
+    isManualVoltageLow(powerTotal.totalW, manualVoltage);
+  const compatibleVoltages = getCompatibleSystemVoltages(
+    battery.batteryVoltage,
+  );
+  const isBatteryCompatible = seriesParallel.isCompatible;
+
+  const handleLossesModeChange = (mode: LossesMode) => {
+    if (mode === "simple") {
+      setLosses({
+        mode: "simple",
+        marginPercent:
+          losses.mode === "simple" ? losses.marginPercent : 25,
+      });
+    } else {
+      setLosses({
+        mode: "advanced",
+        inverterEfficiency:
+          losses.mode === "advanced" ? losses.inverterEfficiency : 92,
+        controllerEfficiency:
+          losses.mode === "advanced" ? losses.controllerEfficiency : 98,
+        cableLossPercent:
+          losses.mode === "advanced" ? losses.cableLossPercent : 3,
+        tempLossPercent:
+          losses.mode === "advanced" ? losses.tempLossPercent : 7,
+      });
+    }
+  };
+
+  const summaryText = () => {
+    const lines = [
+      `Énergie consommée: ${energyLoadDisplay.wh} Wh/j (${energyLoadDisplay.kwh} kWh/j)`,
+      `Énergie à produire: ${energyProducedDisplay.wh} Wh/j (${energyProducedDisplay.kwh} kWh/j)`,
+      `Puissance totale: ${formatNumber(powerTotal.totalW)} W`,
+      `Tension système: ${systemVoltage} V`,
+      `Batteries: ${formatNumber(batteryBank.requiredAh)} Ah`,
+      isBatteryCompatible
+        ? `Batteries: ${seriesParallel.seriesCount} en série x ${seriesParallel.parallelCount} en parallèle = ${seriesParallel.totalBatteries} batteries`
+        : "Batteries: tension incompatible",
+      `PV requis: ${formatNumber(pvSizing.pvPowerWp)} Wp`,
+      `Modules: ${pvSizing.moduleCount} x ${pv.modulePowerWp} Wp = ${formatNumber(
+        pvSizing.installedPowerWp,
+      )} Wp`,
+      `Régulateur: ${controller.type} ${formatNumber(
+        controllerSizing.recommendedCurrentA,
+      )} A → palier ${controllerSizing.standardCurrentA} A`,
+      `Onduleur: ${formatNumber(inverterSizing.recommendedPowerW)} W (pur sinus recommandé)`,
+    ];
+
+    return lines.join("\n");
+  };
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(summaryText());
+  };
+
+  const handleReset = () => {
+    resetAll();
+    useSolarStore.persist.clearStorage();
+    setEquipments(defaultEquipments());
+  };
+
+  const handleEquipmentChange = (
+    id: string,
+    key: keyof Equipment,
+    value: string | number | boolean,
+  ) => {
+    if (key === "name" || key === "type" || key === "include") {
+      updateEquipment(id, { [key]: value } as Partial<Equipment>);
+      return;
+    }
+
+    const numberValue = typeof value === "number" ? value : toNumber(value);
+    const sanitized = (() => {
+      switch (key) {
+        case "powerW":
+          return clampNumber(numberValue, 0);
+        case "hoursPerDay":
+          return clampNumber(numberValue, 0, 24);
+        case "quantity":
+          return clampNumber(Math.round(numberValue), 1);
+        default:
+          return numberValue;
+      }
+    })();
+
+    updateEquipment(id, { [key]: sanitized } as Partial<Equipment>);
+  };
+
+  const renderLossesFields = (lossesConfig: LossesConfig) => {
+    if (lossesConfig.mode === "simple") {
+      return (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+            Marge pertes (%)
+            <input
+              type="number"
+              min={10}
+              max={40}
+              value={lossesConfig.marginPercent}
+              onChange={(event) =>
+                setLosses({
+                  mode: "simple",
+                  marginPercent: clampNumber(toNumber(event.target.value), 10, 40),
+                })
+              }
+              className="input"
+            />
+            <span className="text-xs text-slate-500">Défaut 25%</span>
+          </label>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Rendement onduleur (%)
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={lossesConfig.inverterEfficiency}
+            onChange={(event) =>
+              setLosses({
+                ...lossesConfig,
+                inverterEfficiency: clampNumber(
+                  toNumber(event.target.value),
+                  0,
+                  100,
+                ),
+              })
+            }
+            className="input"
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Rendement régulateur (%)
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={lossesConfig.controllerEfficiency}
+            onChange={(event) =>
+              setLosses({
+                ...lossesConfig,
+                controllerEfficiency: clampNumber(
+                  toNumber(event.target.value),
+                  0,
+                  100,
+                ),
+              })
+            }
+            className="input"
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Pertes câbles (%)
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={lossesConfig.cableLossPercent}
+            onChange={(event) =>
+              setLosses({
+                ...lossesConfig,
+                cableLossPercent: clampNumber(
+                  toNumber(event.target.value),
+                  0,
+                  100,
+                ),
+              })
+            }
+            className="input"
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Pertes température (%)
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={lossesConfig.tempLossPercent}
+            onChange={(event) =>
+              setLosses({
+                ...lossesConfig,
+                tempLossPercent: clampNumber(
+                  toNumber(event.target.value),
+                  0,
+                  100,
+                ),
+              })
+            }
+            className="input"
+          />
+        </label>
+      </div>
+    );
+  };
+
+  const renderEquipmentRow = (equipment: Equipment) => (
+    <tr key={equipment.id} className="border-b border-slate-100">
+      <td className="p-2">
+        <input
+          type="text"
+          value={equipment.name}
+          onChange={(event) =>
+            handleEquipmentChange(equipment.id, "name", event.target.value)
+          }
+          className="input w-full"
+          placeholder="Ex: Réfrigérateur"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+      </td>
+      <td className="p-2">
+        <input
+          type="number"
+          min={0}
+          value={equipment.powerW}
+          onChange={(event) =>
+            handleEquipmentChange(equipment.id, "powerW", event.target.value)
+          }
+          className="input w-full"
+        />
+      </td>
+      <td className="p-2">
+        <input
+          type="number"
+          min={0}
+          max={24}
+          value={equipment.hoursPerDay}
+          onChange={(event) =>
+            handleEquipmentChange(equipment.id, "hoursPerDay", event.target.value)
+          }
+          className="input w-full"
+        />
+      </td>
+      <td className="p-2">
+        <input
+          type="number"
+          min={1}
+          value={equipment.quantity}
+          onChange={(event) =>
+            handleEquipmentChange(equipment.id, "quantity", event.target.value)
+          }
+          className="input w-full"
+        />
+      </td>
+      <td className="p-2">
+        <select
+          value={equipment.type}
+          onChange={(event) =>
+            handleEquipmentChange(equipment.id, "type", event.target.value)
+          }
+          className="input w-full"
+        >
+          <option value="continu">Continu</option>
+          <option value="intermittent">Intermittent</option>
+        </select>
+      </td>
+      <td className="p-2 text-center">
+        <label className="inline-flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={equipment.include}
+            onChange={(event) =>
+              handleEquipmentChange(equipment.id, "include", event.target.checked)
+            }
+            className="h-4 w-4 accent-slate-900"
+          />
+          <span className="sr-only">Inclure</span>
+        </label>
+      </td>
+      <td className="p-2 text-right">
+        <div className="flex flex-wrap justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => duplicateEquipment(equipment.id)}
+            className="btn-secondary"
+          >
+            Dupliquer
+          </button>
+          <button
+            type="button"
+            onClick={() => removeEquipment(equipment.id)}
+            className="btn-secondary text-rose-600"
+          >
+            Supprimer
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+
+  const isPshValid = pshSchema.safeParse(psh).success;
+
+  if (!hasHydrated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <p className="text-slate-500">Chargement des données…</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-8">
+          <span className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">
+            Solaris
+          </span>
+          <h1 className="text-3xl font-semibold text-slate-900">
+            Dimensionnement solaire résidentiel
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="max-w-2xl text-sm text-slate-600">
+            Entrez vos équipements et paramètres de site. Les résultats se
+            mettent à jour instantanément avec les formules du cahier des
+            charges.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      <main className="mx-auto grid w-full max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="flex flex-col gap-6 print:hidden">
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">Région & solaire</h2>
+            </div>
+            <div className="card-body grid gap-3 sm:grid-cols-2">
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                PSH (h/j)
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={0.1}
+                    step={0.1}
+                    value={psh}
+                    onChange={(event) =>
+                      setPsh(clampNumber(toNumber(event.target.value), 0.1))
+                    }
+                    className="input w-full"
+                  />
+                  <span
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500"
+                    title="PSH = Peak Sun Hours : nombre d'heures d'ensoleillement équivalent par jour."
+                  >
+                    ?
+                  </span>
+                </div>
+                {!isPshValid && (
+                  <span className="text-xs text-rose-600">
+                    La PSH doit être strictement supérieure à 0.
+                  </span>
+                )}
+              </label>
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header flex flex-wrap items-center justify-between gap-3">
+              <h2 className="card-title">Équipements</h2>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEquipments(exampleEquipments())}
+                  className="btn-secondary"
+                >
+                  Préremplir exemple
+                </button>
+                <button
+                  type="button"
+                  onClick={addEquipment}
+                  className="btn-primary"
+                >
+                  Ajouter une ligne
+                </button>
+              </div>
+            </div>
+            <div className="card-body">
+              <div className="overflow-x-auto">
+                <table className="min-w-[720px] w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="p-2">Nom</th>
+                      <th className="p-2">Puissance (W)</th>
+                      <th className="p-2">Durée (h/j)</th>
+                      <th className="p-2">Qté</th>
+                      <th className="p-2">Type</th>
+                      <th className="p-2 text-center">Inclure</th>
+                      <th className="p-2 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>{equipments.map(renderEquipmentRow)}</tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="card-title">Pertes & rendements</h2>
+                <p className="text-xs text-slate-500">
+                  Mode simple ou détaillé selon vos données techniques.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className={losses.mode === "simple" ? "font-semibold" : "text-slate-500"}>
+                  Simple
+                </span>
+                <label className="relative inline-flex cursor-pointer items-center">
+                  <input
+                    type="checkbox"
+                    checked={losses.mode === "advanced"}
+                    onChange={(event) =>
+                      handleLossesModeChange(
+                        event.target.checked ? "advanced" : "simple",
+                      )
+                    }
+                    className="peer sr-only"
+                  />
+                  <div className="h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-emerald-500 peer-checked:after:translate-x-full"></div>
+                </label>
+                <span className={losses.mode === "advanced" ? "font-semibold" : "text-slate-500"}>
+                  Avancé
+                </span>
+              </div>
+            </div>
+            <div className="card-body">{renderLossesFields(losses)}</div>
+          </section>
+
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">Tension système</h2>
+            </div>
+            <div className="card-body grid gap-4">
+              <div className="flex items-center gap-3 text-sm">
+                <label className="inline-flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="voltageMode"
+                    checked={voltageMode === "auto"}
+                    onChange={() => setVoltageMode("auto")}
+                  />
+                  Auto (recommandé)
+                </label>
+                <label className="inline-flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="voltageMode"
+                    checked={voltageMode === "manual"}
+                    onChange={() => setVoltageMode("manual")}
+                  />
+                  Manuel
+                </label>
+              </div>
+              {voltageMode === "auto" ? (
+                <div className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
+                  Tension automatique estimée : {autoVoltage} V
+                </div>
+              ) : (
+                <div className="grid gap-2">
+                  <div className="flex flex-wrap gap-3">
+                    {SYSTEM_VOLTAGES.map((voltage) => (
+                      <label
+                        key={voltage}
+                        className="inline-flex items-center gap-2 text-sm"
+                      >
+                        <input
+                          type="radio"
+                          name="manualVoltage"
+                          checked={manualVoltage === voltage}
+                          onChange={() => setManualVoltage(voltage)}
+                        />
+                        {voltage} V
+                      </label>
+                    ))}
+                  </div>
+                  {voltageWarning && (
+                    <p className="text-xs text-amber-600">
+                      Cette tension semble faible pour la puissance totale. En
+                      auto, la recommandation est {autoVoltage} V.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">Batteries</h2>
+            </div>
+            <div className="card-body grid gap-4 sm:grid-cols-2">
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                Autonomie (jours)
+                <input
+                  type="number"
+                  min={1}
+                  value={battery.autonomyDays}
+                  onChange={(event) =>
+                    setBattery({
+                      ...battery,
+                      autonomyDays: clampNumber(toNumber(event.target.value), 1),
+                    })
+                  }
+                  className="input"
+                />
+              </label>
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                Profondeur décharge (%)
+                <input
+                  type="number"
+                  min={10}
+                  max={100}
+                  value={battery.depthOfDischargePercent}
+                  onChange={(event) =>
+                    setBattery({
+                      ...battery,
+                      depthOfDischargePercent: clampNumber(
+                        toNumber(event.target.value),
+                        10,
+                        100,
+                      ),
+                    })
+                  }
+                  className="input"
+                />
+              </label>
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                Tension batterie unitaire (V)
+                <select
+                  value={battery.batteryVoltage}
+                  onChange={(event) =>
+                    setBattery({
+                      ...battery,
+                      batteryVoltage: toNumber(event.target.value),
+                    })
+                  }
+                  className="input"
+                >
+                  {SYSTEM_VOLTAGES.map((voltage) => (
+                    <option key={voltage} value={voltage}>
+                      {voltage} V
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                Capacité batterie unitaire (Ah)
+                <input
+                  type="number"
+                  min={1}
+                  value={battery.batteryCapacityAh}
+                  onChange={(event) =>
+                    setBattery({
+                      ...battery,
+                      batteryCapacityAh: clampNumber(
+                        toNumber(event.target.value),
+                        1,
+                      ),
+                    })
+                  }
+                  className="input"
+                />
+              </label>
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                Type de batterie
+                <select
+                  value={battery.batteryType}
+                  onChange={(event) =>
+                    setBattery({
+                      ...battery,
+                      batteryType: event.target.value as BatteryConfig["batteryType"],
+                    })
+                  }
+                  className="input"
+                >
+                  <option value="AGM">AGM</option>
+                  <option value="GEL">GEL</option>
+                  <option value="LiFePO4">LiFePO4</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">Panneaux, régulateur & onduleur</h2>
+            </div>
+            <div className="card-body grid gap-4 sm:grid-cols-2">
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                Puissance module (Wp)
+                <input
+                  type="number"
+                  min={1}
+                  value={pv.modulePowerWp}
+                  onChange={(event) =>
+                    setPv({
+                      ...pv,
+                      modulePowerWp: clampNumber(toNumber(event.target.value), 1),
+                    })
+                  }
+                  className="input"
+                />
+              </label>
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                Oversize PV (%)
+                <input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={pv.oversizePercent}
+                  onChange={(event) =>
+                    setPv({
+                      ...pv,
+                      oversizePercent: clampNumber(
+                        toNumber(event.target.value),
+                        0,
+                        20,
+                      ),
+                    })
+                  }
+                  className="input"
+                />
+              </label>
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                Type régulateur
+                <select
+                  value={controller.type}
+                  onChange={(event) =>
+                    setController({ type: event.target.value as "PWM" | "MPPT" })
+                  }
+                  className="input"
+                >
+                  <option value="MPPT">MPPT</option>
+                  <option value="PWM">PWM</option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                Marge onduleur (%)
+                <input
+                  type="number"
+                  min={0}
+                  value={inverter.marginPercent}
+                  onChange={(event) =>
+                    setInverter({
+                      ...inverter,
+                      marginPercent: clampNumber(toNumber(event.target.value), 0),
+                    })
+                  }
+                  className="input"
+                />
+              </label>
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={inverter.surgeEnabled}
+                  onChange={(event) =>
+                    setInverter({
+                      ...inverter,
+                      surgeEnabled: event.target.checked,
+                    })
+                  }
+                />
+                Option "Surge" (frigo, clim)
+              </label>
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">Actions</h2>
+            </div>
+            <div className="card-body flex flex-wrap gap-3">
+              <button type="button" onClick={handleCopy} className="btn-primary">
+                Copier le résumé
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="btn-secondary"
+              >
+                Exporter (imprimer)
+              </button>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="btn-secondary text-rose-600"
+              >
+                Reset
+              </button>
+            </div>
+          </section>
         </div>
+
+        <aside className="card h-fit border-emerald-100 bg-white lg:sticky lg:top-6">
+          <div className="card-header border-b border-emerald-100">
+            <h2 className="card-title">Résultats</h2>
+            <p className="text-xs text-slate-500">
+              Calculs mis à jour en temps réel.
+            </p>
+          </div>
+          <div className="card-body flex flex-col gap-4">
+            <div className="grid gap-3">
+              <div>
+                <p className="text-xs uppercase text-slate-400">Énergie consommée</p>
+                <p className="text-lg font-semibold text-slate-900">
+                  {energyLoadDisplay.wh} Wh/j ({energyLoadDisplay.kwh} kWh/j)
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase text-slate-400">Énergie à produire</p>
+                <p className="text-lg font-semibold text-slate-900">
+                  {energyProducedDisplay.wh} Wh/j ({energyProducedDisplay.kwh} kWh/j)
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase text-slate-400">Puissance totale</p>
+                <p className="text-lg font-semibold text-slate-900">
+                  {formatNumber(powerTotal.totalW)} W
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase text-slate-400">Tension système</p>
+                <p className="text-lg font-semibold text-slate-900">
+                  {systemVoltage} V
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <h3 className="text-sm font-semibold text-slate-700">Batteries</h3>
+              <p className="text-lg font-semibold text-slate-900">
+                {formatNumber(batteryBank.requiredAh)} Ah
+              </p>
+              {isBatteryCompatible ? (
+                <p className="text-xs text-slate-600">
+                  {seriesParallel.seriesCount} en série × {seriesParallel.parallelCount} en parallèle = {seriesParallel.totalBatteries} batteries
+                </p>
+              ) : (
+                <p className="text-xs text-rose-600">
+                  La tension système ({systemVoltage} V) doit être un multiple de {battery.batteryVoltage} V.
+                  Suggestions : {compatibleVoltages.join(" / ")} V.
+                </p>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <h3 className="text-sm font-semibold text-slate-700">Panneaux PV</h3>
+              <p className="text-lg font-semibold text-slate-900">
+                {formatNumber(pvSizing.pvPowerWp)} Wp
+              </p>
+              <p className="text-xs text-slate-600">
+                {pvSizing.moduleCount} modules × {pv.modulePowerWp} Wp = {formatNumber(
+                  pvSizing.installedPowerWp,
+                )} Wp installés
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <h3 className="text-sm font-semibold text-slate-700">Régulateur</h3>
+              <p className="text-lg font-semibold text-slate-900">
+                {controller.type} · {formatNumber(controllerSizing.recommendedCurrentA)} A
+              </p>
+              <p className="text-xs text-slate-600">
+                Palier recommandé : {controllerSizing.standardCurrentA} A
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <h3 className="text-sm font-semibold text-slate-700">Onduleur</h3>
+              <p className="text-lg font-semibold text-slate-900">
+                {formatNumber(inverterSizing.recommendedPowerW)} W
+              </p>
+              <p className="text-xs text-slate-600">Pur sinus recommandé.</p>
+            </div>
+
+            <details className="rounded-lg border border-slate-200 bg-white p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-slate-700">
+                Détails des calculs
+              </summary>
+              <div className="mt-3 space-y-3 text-xs text-slate-600">
+                <div>
+                  <p className="font-semibold">Énergie consommée</p>
+                  <p>E = Σ(P × h × Qté) = {energyLoadDisplay.wh} Wh/j</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Énergie à produire</p>
+                  {losses.mode === "simple" ? (
+                    <p>
+                      E_prod = E_load × (1 + pertes%) = {energyProducedDisplay.wh} Wh/j
+                    </p>
+                  ) : (
+                    <p>
+                      E_prod = E_load / (η_inv × η_reg × (1 - L_cable) × (1 - L_temp))
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold">Batteries</p>
+                  <p>
+                    C_bank = (E_prod × Autonomie) / (V_sys × DoD)
+                  </p>
+                </div>
+                <div>
+                  <p className="font-semibold">PV</p>
+                  <p>
+                    P_pv = (E_prod / PSH) × (1 + oversize%) = {formatNumber(
+                      pvSizing.pvPowerWp,
+                    )} Wp
+                  </p>
+                </div>
+                <div>
+                  <p className="font-semibold">Régulateur</p>
+                  <p>
+                    I = P_inst / V_sys × 1.25 = {formatNumber(
+                      controllerSizing.recommendedCurrentA,
+                    )} A
+                  </p>
+                </div>
+                <div>
+                  <p className="font-semibold">Onduleur</p>
+                  <p>
+                    P_inv = max(P_total × (1 + marge), P_surge)
+                  </p>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
       </main>
+
+      <section className="mx-auto w-full max-w-6xl px-6 pb-10 print:block print:px-0">
+        <div className="hidden print:block">
+          <h2 className="text-xl font-semibold text-slate-900">
+            Tableau équipements
+          </h2>
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-slate-200 text-xs uppercase text-slate-400">
+                <tr>
+                  <th className="py-2">Nom</th>
+                  <th className="py-2">Puissance</th>
+                  <th className="py-2">Durée</th>
+                  <th className="py-2">Qté</th>
+                </tr>
+              </thead>
+              <tbody>
+                {equipments
+                  .filter((equipment) => equipment.include)
+                  .map((equipment) => (
+                    <tr key={equipment.id} className="border-b border-slate-100">
+                      <td className="py-2">{equipment.name || "-"}</td>
+                      <td className="py-2">{equipment.powerW} W</td>
+                      <td className="py-2">{equipment.hoursPerDay} h/j</td>
+                      <td className="py-2">{equipment.quantity}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

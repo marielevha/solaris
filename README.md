@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Solaris – Dimensionnement solaire domestique
 
-## Getting Started
+Application web mono-page pour dimensionner une installation solaire résidentielle : charges, batteries, PV, régulateur et onduleur. Les calculs suivent strictement le cahier des charges et sont isolés dans `src/domain`.
 
-First, run the development server:
+## Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Développement
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Ouvrez [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+## Build production
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm build
+pnpm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `app/page.tsx` : UI et interactions (aucun calcul métier).
+- `src/domain` : fonctions pures de calcul (testées avec Vitest).
+- `src/store` : store Zustand avec persistance localStorage.
 
-## Deploy on Vercel
+## Hypothèses & choix documentés
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Surge onduleur** : facteur 2× appliqué aux équipements dont le nom contient `frigo`, `réfrig`, `refrig`, `clim`, `climat`, `air` (réfrigérateur + climatisation minimum).
+- **Paliers régulateur** : 10, 20, 30, 40, 50, 60, 80, 100, 120, 150, 200 A (palier immédiatement supérieur).
+- **Tension auto** : 12 V ≤ 1000 W, 24 V entre 1001 et 2000 W, 48 V au-delà.
+- **Impression** : le bouton “Exporter” lance `window.print` et affiche uniquement le résumé + tableau des équipements.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tests
+
+```bash
+pnpm test
+```
