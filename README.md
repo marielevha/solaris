@@ -29,6 +29,17 @@ pnpm start
 - `src/domain` : fonctions pures de calcul (testées avec Vitest).
 - `src/store` : store Zustand avec persistance localStorage.
 
+## Pages utilitaires
+
+- `/politique` : politique de confidentialité.
+- `/conditions` : conditions générales d’utilisation.
+- `/a-propos` : présentation du projet + formulaire de contact.
+
+## Formulaire de contact
+
+- **Endpoint** : `POST /api/contact`.
+- **Stockage** : fichier local `.data/contact-messages.json` (MVP, sans envoi d’email).
+
 ## Hypothèses & choix documentés
 
 - **Surge onduleur** : facteur 2× appliqué aux équipements dont le nom contient `frigo`, `réfrig`, `refrig`, `clim`, `climat`, `air` (réfrigérateur + climatisation minimum).

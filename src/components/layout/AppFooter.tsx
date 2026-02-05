@@ -1,33 +1,65 @@
 import Link from "next/link";
 
-const footerLinks = [
+const quickLinks = [
   { label: "Dimensionnement", href: "/" },
   { label: "Partenaires", href: "/partenaires" },
   { label: "Shop", href: "/shop" },
 ];
 
+const infoLinks = [
+  { label: "Politique de confidentialité", href: "/politique" },
+  { label: "Conditions générales", href: "/conditions" },
+  { label: "À propos", href: "/a-propos" },
+];
+
 export default function AppFooter() {
+  const year = new Date().getFullYear();
+
   return (
     <footer className="border-t border-slate-100 bg-white">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-2">
-          <span>© Solaris Congo. Tous droits réservés.</span>
-          <span>Dimensionnement solaire & partenaires certifiés.</span>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 text-sm text-slate-500 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-2">
+            <span>© {year} Solaris Congo.</span>
+            <span>Dimensionnement solaire & partenaires certifiés.</span>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <nav aria-label="Liens rapides">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Navigation
+              </p>
+              <ul className="mt-3 flex flex-col gap-2">
+                {quickLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-slate-500 underline-offset-4 transition hover:text-slate-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <nav aria-label="Informations">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Informations
+              </p>
+              <ul className="mt-3 flex flex-col gap-2">
+                {infoLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-slate-500 underline-offset-4 transition hover:text-slate-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
         </div>
-        <nav aria-label="Liens rapides">
-          <ul className="flex flex-wrap gap-3">
-            {footerLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
       </div>
     </footer>
   );
