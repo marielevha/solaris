@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 const navItems = [
   { label: "Dimensionnement", href: "/" },
   { label: "Partenaires", href: "/partenaires" },
+  { label: "Shop", href: "/shop" },
 ];
 
 const isActivePath = (pathname: string, href: string) => {

@@ -37,6 +37,38 @@ pnpm start
 - **Impression** : le bouton “Exporter” lance `window.print` et affiche uniquement le résumé + tableau des équipements.
 - **Partenaires** : données figées via `src/data/partners.json`, recherche/filtres/tri côté client avec normalisation (pays en uppercase, services nettoyés) dans `loadPartners`.
 - **UI partenaires** : cartes responsives avec fallback d’initiales lorsque le logo n’est pas fourni, pagination client configurable.
+- **Shop** : page `/shop` avec catalogue statique depuis `src/data/products.json`, images placeholder (`/public/shop/placeholder.svg`) en attendant des visuels produits.
+
+## Shop
+
+- **Page** : `/shop`.
+- **Données** : `src/data/products.json`.
+- **Disclaimer** : affiché sur la page shop pour signaler prix indicatifs et liens affiliés éventuels.
+- **Format JSON attendu** :
+
+```json
+[
+  {
+    "id": "prod_001",
+    "name": "Panneau solaire 450W monocristallin",
+    "category": "Panneaux",
+    "brand": "Generic",
+    "price": 149.0,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.5,
+    "tags": ["Mono", "450W", "Half-cut"],
+    "imageUrl": "/shop/panel-450.png",
+    "shortDescription": "1 phrase max.",
+    "specs": {
+      "powerWp": 450,
+      "voltageVmp": 41.0,
+      "currentImp": 10.9
+    },
+    "affiliateUrl": "https://example.com"
+  }
+]
+```
 
 ## Tests
 
