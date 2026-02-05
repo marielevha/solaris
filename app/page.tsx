@@ -331,7 +331,11 @@ export default function Home() {
       return;
     }
 
-    const numberValue = typeof value === "number" ? value : toNumber(value);
+    const numberValue = (() => {
+      if (typeof value === "number") return value;
+      if (typeof value === "string") return toNumber(value);
+      return 0;
+    })();
     const sanitized = (() => {
       switch (key) {
         case "powerW":
