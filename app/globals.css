@@ -5,6 +5,11 @@
   --foreground: #0f172a;
 }
 
+html.light {
+  --background: #ffffff;
+  --foreground: #0f172a;
+}
+
 html.dark {
   --background: #0b1120;
   --foreground: #e2e8f0;
@@ -18,7 +23,7 @@ html.dark {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     --background: #0b1120;
     --foreground: #e2e8f0;
   }
