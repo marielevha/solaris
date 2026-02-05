@@ -104,11 +104,11 @@ export default function AppHeader() {
   }, [theme]);
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header className="app-header fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="flex items-center gap-3 text-base font-semibold text-slate-900 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+          className="flex items-center gap-3 text-base font-semibold text-slate-900 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-slate-100 dark:hover:text-white"
         >
           <Image
             src="/solaris-congo-logo.svg"
@@ -118,7 +118,7 @@ export default function AppHeader() {
           />
           <span>Solaris Congo</span>
         </Link>
-        <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
+        <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex dark:text-slate-300">
           {navItems.map((item) => {
             const active = isActivePath(pathname, item.href);
             return (
@@ -128,8 +128,8 @@ export default function AppHeader() {
                 aria-current={active ? "page" : undefined}
                 className={`transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                   active
-                    ? "text-slate-900 underline underline-offset-8"
-                    : "hover:text-slate-800"
+                    ? "text-slate-900 underline underline-offset-8 dark:text-white"
+                    : "hover:text-slate-800 dark:hover:text-slate-100"
                 }`}
               >
                 {item.label}
@@ -145,7 +145,7 @@ export default function AppHeader() {
                 currentTheme === "dark" ? "light" : "dark",
               )
             }
-            className="btn-secondary hidden items-center gap-2 md:inline-flex"
+            className="btn-secondary hidden items-center gap-2 md:inline-flex dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
             aria-label={
               theme === "dark"
                 ? "Passer en mode clair"
@@ -163,7 +163,7 @@ export default function AppHeader() {
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 md:hidden"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 md:hidden dark:border-slate-800 dark:text-slate-100 dark:hover:bg-slate-900"
             aria-label="Ouvrir le menu"
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
@@ -176,11 +176,11 @@ export default function AppHeader() {
       </div>
       <div
         id="mobile-menu"
-        className={`border-t border-slate-200 bg-white px-4 pb-4 pt-2 transition md:hidden ${
+        className={`border-t border-slate-200 bg-white px-4 pb-4 pt-2 transition md:hidden dark:border-slate-800 dark:bg-slate-950 ${
           isMenuOpen ? "block" : "hidden"
         }`}
       >
-        <nav className="flex flex-col gap-3 text-sm font-medium text-slate-600">
+        <nav className="flex flex-col gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">
           {navItems.map((item) => {
             const active = isActivePath(pathname, item.href);
             return (
@@ -190,8 +190,8 @@ export default function AppHeader() {
                 aria-current={active ? "page" : undefined}
                 className={`rounded-lg px-2 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                   active
-                    ? "bg-slate-50 text-slate-900"
-                    : "hover:bg-slate-50 hover:text-slate-800"
+                    ? "bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100"
+                    : "hover:bg-slate-50 hover:text-slate-800 dark:hover:bg-slate-900 dark:hover:text-slate-100"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -207,7 +207,7 @@ export default function AppHeader() {
               currentTheme === "dark" ? "light" : "dark",
             )
           }
-          className="btn-secondary mt-4 inline-flex items-center gap-2"
+          className="btn-secondary mt-4 inline-flex items-center gap-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
           aria-label={
             theme === "dark"
               ? "Passer en mode clair"
