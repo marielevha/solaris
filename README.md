@@ -35,6 +35,8 @@ pnpm start
 - **Paliers régulateur** : 10, 20, 30, 40, 50, 60, 80, 100, 120, 150, 200 A (palier immédiatement supérieur).
 - **Tension auto** : 12 V ≤ 1000 W, 24 V entre 1001 et 2000 W, 48 V au-delà.
 - **Impression** : le bouton “Exporter” lance `window.print` et affiche uniquement le résumé + tableau des équipements.
+- **Partenaires** : données figées via `src/data/partners.json`, recherche/filtres/tri côté client avec normalisation (pays en uppercase, services nettoyés) dans `loadPartners`.
+- **UI partenaires** : cartes responsives avec fallback d’initiales lorsque le logo n’est pas fourni, pagination client configurable.
 
 ## Tests
 

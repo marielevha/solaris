@@ -119,6 +119,11 @@ html.dark .card-header {
   border-color: #1e293b;
 }
 
+html.dark .app-header {
+  background-color: rgb(2 6 23 / 0.9);
+  border-color: #1e293b;
+}
+
 html.dark .card-title {
   color: #f8fafc;
 }
