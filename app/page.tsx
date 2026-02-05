@@ -1045,7 +1045,7 @@ export default function Home() {
 
         </div>
 
-        <aside className="flex h-fit flex-col gap-6 lg:sticky lg:top-6">
+        <aside className="flex h-fit flex-col gap-6 self-start lg:sticky lg:top-6">
           {hasResults && (
             <section className="card border-slate-200 bg-white">
               <div className="card-header">
@@ -1243,6 +1243,40 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-slate-200 bg-white/80">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-6 text-sm text-slate-600 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-wrap items-center gap-4">
+            <a
+              className="font-medium text-slate-600 transition hover:text-slate-900"
+              href="https://www.encyclo-ecolo.com/energie-solaire"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Guide énergie solaire
+            </a>
+            <a
+              className="font-medium text-slate-600 transition hover:text-slate-900"
+              href="https://www.ademe.fr/particuliers-eco-citoyens"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Conseils ADEME
+            </a>
+            <a
+              className="font-medium text-slate-600 transition hover:text-slate-900"
+              href="https://www.ines-solaire.org"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Institut INES
+            </a>
+          </div>
+          <span className="text-xs uppercase tracking-wide text-slate-400">
+            Propulsé par Maeva Inco
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
