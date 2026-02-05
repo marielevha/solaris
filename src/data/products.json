@@ -1,0 +1,266 @@
+[
+  {
+    "id": "prod_001",
+    "name": "Panneau solaire 450W monocristallin",
+    "category": "Panneaux",
+    "brand": "Solaris",
+    "price": 149.0,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.5,
+    "tags": ["Mono", "450W", "Half-cut"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Module 450W haute efficacité pour toitures et structures solaires.",
+    "specs": {
+      "powerWp": 450,
+      "voltageVmp": 41.0,
+      "currentImp": 10.9
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_002",
+    "name": "Panneau solaire 550W bifacial",
+    "category": "Panneaux",
+    "brand": "HelioMax",
+    "price": 209.0,
+    "currency": "EUR",
+    "availability": "Précommande",
+    "rating": 4.7,
+    "tags": ["Bifacial", "550W", "Mono"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Performance renforcée grâce à la captation double face.",
+    "specs": {
+      "powerWp": 550,
+      "voltageVmp": 42.5,
+      "currentImp": 12.9
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_003",
+    "name": "Batterie lithium 48V 100Ah",
+    "category": "Batteries",
+    "brand": "VoltEdge",
+    "price": 1290,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.8,
+    "tags": ["LiFePO4", "48V", "100Ah"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Stockage lithium longue durée avec BMS intégré.",
+    "specs": {
+      "voltage": 48,
+      "capacityAh": 100,
+      "cycles": 6000
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_004",
+    "name": "Batterie AGM 12V 200Ah",
+    "category": "Batteries",
+    "brand": "DeepCycle",
+    "price": 289,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.2,
+    "tags": ["AGM", "12V", "200Ah"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Batterie AGM robuste pour installations résidentielles.",
+    "specs": {
+      "voltage": 12,
+      "capacityAh": 200,
+      "maintenance": "Sans entretien"
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_005",
+    "name": "Onduleur pur sinus 3000W 24V",
+    "category": "Onduleurs",
+    "brand": "PureWave",
+    "price": 499,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.4,
+    "tags": ["Pur sinus", "3000W", "24V"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Onduleur stable pour charges sensibles et démarrages moteurs.",
+    "specs": {
+      "powerW": 3000,
+      "inputVoltage": 24,
+      "surgeW": 6000
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_006",
+    "name": "Onduleur hybride 5kW 48V",
+    "category": "Onduleurs",
+    "brand": "GridFlex",
+    "price": 1190,
+    "currency": "EUR",
+    "availability": "Précommande",
+    "rating": 4.6,
+    "tags": ["Hybride", "5kW", "48V"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Gestion PV + réseau avec chargeur intégré.",
+    "specs": {
+      "powerW": 5000,
+      "inputVoltage": 48,
+      "mppt": true
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_007",
+    "name": "Régulateur MPPT 60A 12/24V",
+    "category": "Régulateurs",
+    "brand": "SunPulse",
+    "price": 219,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.3,
+    "tags": ["MPPT", "60A", "12/24V"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Optimisation MPPT pour un rendement maximal.",
+    "specs": {
+      "currentA": 60,
+      "systemVoltage": "12/24",
+      "efficiency": "98%"
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_008",
+    "name": "Régulateur PWM 30A",
+    "category": "Régulateurs",
+    "brand": "EcoCharge",
+    "price": 59,
+    "currency": "EUR",
+    "availability": "Rupture",
+    "rating": 3.9,
+    "tags": ["PWM", "30A", "12/24V"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Solution économique pour petites installations.",
+    "specs": {
+      "currentA": 30,
+      "systemVoltage": "12/24",
+      "display": "LCD"
+    }
+  },
+  {
+    "id": "prod_009",
+    "name": "Câble solaire 6mm² rouge (50m)",
+    "category": "Câbles",
+    "brand": "FlexCore",
+    "price": 89,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.1,
+    "tags": ["6mm²", "UV", "50m"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Câble solaire résistant UV pour liaisons PV.",
+    "specs": {
+      "section": "6mm²",
+      "lengthM": 50,
+      "color": "Rouge"
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_010",
+    "name": "Câble batterie 25mm² noir (2m)",
+    "category": "Câbles",
+    "brand": "FlexCore",
+    "price": 18,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.0,
+    "tags": ["25mm²", "2m"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Câble de puissance pour raccordement batterie.",
+    "specs": {
+      "section": "25mm²",
+      "lengthM": 2,
+      "color": "Noir"
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_011",
+    "name": "Disjoncteur DC 125A",
+    "category": "Protections",
+    "brand": "SafeLine",
+    "price": 39,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.3,
+    "tags": ["DC", "125A", "Protection"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Protection DC compacte pour circuits batterie.",
+    "specs": {
+      "currentA": 125,
+      "voltage": "DC 250V",
+      "poles": 2
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_012",
+    "name": "Parafoudre DC type 2",
+    "category": "Protections",
+    "brand": "SafeLine",
+    "price": 64,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.2,
+    "tags": ["Surge", "DC", "Type 2"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Protection contre les surtensions PV.",
+    "specs": {
+      "maxVoltage": "DC 600V",
+      "responseTime": "<25ns",
+      "type": "2"
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_013",
+    "name": "Kit connecteurs MC4 (10 paires)",
+    "category": "Accessoires",
+    "brand": "SolarFix",
+    "price": 22,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.1,
+    "tags": ["MC4", "Connecteurs"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Connecteurs étanches pour raccords photovoltaïques.",
+    "specs": {
+      "pairs": 10,
+      "protection": "IP67"
+    },
+    "affiliateUrl": "https://example.com"
+  },
+  {
+    "id": "prod_014",
+    "name": "Support aluminium pour panneau (2 rails)",
+    "category": "Accessoires",
+    "brand": "SolarFix",
+    "price": 74,
+    "currency": "EUR",
+    "availability": "En stock",
+    "rating": 4.0,
+    "tags": ["Support", "Rails", "Alu"],
+    "imageUrl": "/shop/placeholder.svg",
+    "shortDescription": "Rails aluminium ajustables pour fixation toiture.",
+    "specs": {
+      "lengthM": 2,
+      "material": "Aluminium",
+      "compatible": "panneaux 60/72 cellules"
+    },
+    "affiliateUrl": "https://example.com"
+  }
+]
