@@ -28,6 +28,7 @@ import {
   exampleEquipments,
   useSolarStore,
 } from "@/store/solarStore";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 const numberFormatter = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 1,
@@ -630,6 +631,7 @@ export default function Home() {
             mettent à jour instantanément avec les formules du cahier des
             charges.
           </p>
+          <AdSlot placement="header" variant="compact" />
         </div>
       </header>
 
@@ -1057,7 +1059,9 @@ export default function Home() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => window.print()}
+                  onClick={() =>
+                    window.open("/print", "_blank", "noopener,noreferrer")
+                  }
                   className="btn-secondary"
                 >
                   Exporter (imprimer)
@@ -1106,6 +1110,8 @@ export default function Home() {
                   </p>
                 </div>
               </div>
+
+              <AdSlot placement="results" variant="full" />
 
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <h3 className="text-sm font-semibold text-slate-700">Batteries</h3>
@@ -1243,6 +1249,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="mx-auto w-full max-w-6xl px-6 py-6">
+          <AdSlot placement="footer" variant="compact" />
+        </div>
+      </footer>
     </div>
   );
 }

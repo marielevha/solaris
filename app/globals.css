@@ -137,4 +137,19 @@ html.dark .btn-secondary:hover {
     background: white;
     color: #0f172a;
   }
+
+  header,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+
+  .card,
+  .rounded-2xl {
+    box-shadow: none !important;
+  }
 }

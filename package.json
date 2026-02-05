@@ -7,11 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prisma:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.16.0",
     "nanoid": "^5.1.5",
     "next": "16.1.6",
+    "prisma": "^6.16.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "zod": "^4.1.9",
@@ -25,6 +28,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "tsx": "^4.20.5",
     "typescript": "^5",
     "vitest": "^3.2.4"
   }
