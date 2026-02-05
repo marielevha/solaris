@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Product } from "@/types/products";
 import ProductCard from "@/components/shop/ProductCard";
 import ShopFilters, {
@@ -22,6 +22,8 @@ type ShopClientProps = {
 
 export default function ShopClient({ initialProducts }: ShopClientProps) {
   const [filters, setFilters] = useState<ShopFiltersState>(initialFilters);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 9;
 
   const productsWithIndex = useMemo(
     () =>
@@ -82,6 +84,24 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     }
   }, [filteredProducts, filters.sort]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedProducts.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+
+  useEffect(() => {
+    if (currentPage !== safePage) {
+      setCurrentPage(safePage);
+    }
+  }, [currentPage, safePage]);
+
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (safePage - 1) * pageSize;
+    return sortedProducts.slice(startIndex, startIndex + pageSize);
+  }, [pageSize, safePage, sortedProducts]);
+
   const handleReset = useCallback(() => {
     setFilters(initialFilters);
   }, []);
@@ -100,6 +120,14 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     }
   }, []);
 
+  const handlePreviousPage = useCallback(() => {
+    setCurrentPage((page) => Math.max(1, page - 1));
+  }, []);
+
+  const handleNextPage = useCallback(() => {
+    setCurrentPage((page) => Math.min(totalPages, page + 1));
+  }, [totalPages]);
+
   return (
     <div className="flex flex-col gap-8">
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-4 text-sm text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-100">
@@ -113,9 +141,44 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-500">
-          {sortedProducts.length} produit{sortedProducts.length > 1 ? "s" : ""}
-        </p>
+        <div className="flex flex-col gap-1 text-sm text-slate-500">
+          <span>
+            {sortedProducts.length} produit
+            {sortedProducts.length > 1 ? "s" : ""}
+          </span>
+          {sortedProducts.length > 0 ? (
+            <span>
+              Affichage{" "}
+              {(safePage - 1) * pageSize + 1}
+              {"-"}
+              {Math.min(safePage * pageSize, sortedProducts.length)} sur{" "}
+              {sortedProducts.length}
+            </span>
+          ) : null}
+        </div>
+        {sortedProducts.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <button
+              type="button"
+              onClick={handlePreviousPage}
+              className="btn-secondary px-3 py-1.5 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={safePage === 1}
+            >
+              Précédent
+            </button>
+            <span className="text-slate-500">
+              Page {safePage} / {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={handleNextPage}
+              className="btn-secondary px-3 py-1.5 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={safePage === totalPages}
+            >
+              Suivant
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {sortedProducts.length === 0 ? (
@@ -124,7 +187,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {sortedProducts.map((product) => (
+          {paginatedProducts.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
