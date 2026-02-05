@@ -98,47 +98,8 @@ const TrashIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const SunIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    aria-hidden="true"
-  >
-    <circle cx="12" cy="12" r="4" />
-    <path d="M12 2v2" />
-    <path d="M12 20v2" />
-    <path d="M4.93 4.93l1.41 1.41" />
-    <path d="M17.66 17.66l1.41 1.41" />
-    <path d="M2 12h2" />
-    <path d="M20 12h2" />
-    <path d="M4.93 19.07l1.41-1.41" />
-    <path d="M17.66 6.34l1.41-1.41" />
-  </svg>
-);
-
-const MoonIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    aria-hidden="true"
-  >
-    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
-  </svg>
-);
-
 export default function Home() {
   const [hasHydrated, setHasHydrated] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
   const {
     psh,
     equipments,
@@ -170,24 +131,6 @@ export default function Home() {
     setHasHydrated(true);
   }, []);
 
-  useEffect(() => {
-    const storedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-    const nextTheme =
-      storedTheme === "light" || storedTheme === "dark"
-        ? storedTheme
-        : prefersDark
-          ? "dark"
-          : "light";
-    setTheme(nextTheme);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("theme", theme);
-  }, [theme]);
 
   const energyLoad = useMemo(() => computeEnergyLoad(equipments), [equipments]);
   const powerTotal = useMemo(() => computePowerTotal(equipments), [equipments]);
@@ -578,11 +521,6 @@ export default function Home() {
   );
 
   const isPshValid = pshSchema.safeParse(psh).success;
-  const toggleTheme = () =>
-    setTheme((currentTheme) =>
-      currentTheme === "dark" ? "light" : "dark",
-    );
-
   if (!hasHydrated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -593,39 +531,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+      <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <img
-                src="/solaris-congo-logo.svg"
-                alt="Logo Solaris Congo"
-                className="h-10 w-10"
-              />
-              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">
-                Solaris Congo
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="btn-secondary inline-flex items-center gap-2"
-              aria-label={
-                theme === "dark"
-                  ? "Passer en mode clair"
-                  : "Passer en mode sombre"
-              }
-            >
-              {theme === "dark" ? (
-                <SunIcon className="h-4 w-4" />
-              ) : (
-                <MoonIcon className="h-4 w-4" />
-              )}
-              <span className="text-sm">
-                {theme === "dark" ? "Mode clair" : "Mode sombre"}
-              </span>
-            </button>
-          </div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
+            Dimensionnement
+          </p>
           <h1 className="text-3xl font-semibold text-slate-900">
             Dimensionnement solaire résidentiel
           </h1>
@@ -635,7 +545,7 @@ export default function Home() {
             charges.
           </p>
         </div>
-      </header>
+      </section>
 
       <main className="mx-auto grid w-full max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex flex-col gap-6 print:hidden">

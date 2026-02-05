@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <div className="flex min-h-screen flex-col">
           <AppHeader />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 pt-20">{children}</main>
           <AppFooter />
         </div>
       </body>

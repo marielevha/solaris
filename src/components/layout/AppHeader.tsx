@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { label: "Dimensionnement", href: "/" },
@@ -40,18 +41,82 @@ const MenuIcon = ({ open }: { open: boolean }) => (
   </svg>
 );
 
+const SunIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2" />
+    <path d="M12 20v2" />
+    <path d="M4.93 4.93l1.41 1.41" />
+    <path d="M17.66 17.66l1.41 1.41" />
+    <path d="M2 12h2" />
+    <path d="M20 12h2" />
+    <path d="M4.93 19.07l1.41-1.41" />
+    <path d="M17.66 6.34l1.41-1.41" />
+  </svg>
+);
+
+const MoonIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+  </svg>
+);
+
 export default function AppHeader() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    const nextTheme =
+      storedTheme === "light" || storedTheme === "dark"
+        ? storedTheme
+        : prefersDark
+          ? "dark"
+          : "light";
+    setTheme(nextTheme);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   return (
-    <header className="border-b border-slate-100 bg-white/80 backdrop-blur">
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="text-base font-semibold text-slate-900 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+          className="flex items-center gap-3 text-base font-semibold text-slate-900 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
         >
-          Solaris Congo
+          <Image
+            src="/solaris-congo-logo.svg"
+            alt="Logo Solaris Congo"
+            width={36}
+            height={36}
+          />
+          <span>Solaris Congo</span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
           {navItems.map((item) => {
@@ -72,21 +137,46 @@ export default function AppHeader() {
             );
           })}
         </nav>
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 md:hidden"
-          aria-label="Ouvrir le menu"
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-menu"
-          onClick={() => setIsMenuOpen((open) => !open)}
-        >
-          <MenuIcon open={isMenuOpen} />
-          Menu
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() =>
+              setTheme((currentTheme) =>
+                currentTheme === "dark" ? "light" : "dark",
+              )
+            }
+            className="btn-secondary hidden items-center gap-2 md:inline-flex"
+            aria-label={
+              theme === "dark"
+                ? "Passer en mode clair"
+                : "Passer en mode sombre"
+            }
+          >
+            {theme === "dark" ? (
+              <SunIcon className="h-4 w-4" />
+            ) : (
+              <MoonIcon className="h-4 w-4" />
+            )}
+            <span className="text-sm">
+              {theme === "dark" ? "Mode clair" : "Mode sombre"}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 md:hidden"
+            aria-label="Ouvrir le menu"
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setIsMenuOpen((open) => !open)}
+          >
+            <MenuIcon open={isMenuOpen} />
+            Menu
+          </button>
+        </div>
       </div>
       <div
         id="mobile-menu"
-        className={`border-t border-slate-100 bg-white px-4 pb-4 pt-2 transition md:hidden ${
+        className={`border-t border-slate-200 bg-white px-4 pb-4 pt-2 transition md:hidden ${
           isMenuOpen ? "block" : "hidden"
         }`}
       >
@@ -110,6 +200,29 @@ export default function AppHeader() {
             );
           })}
         </nav>
+        <button
+          type="button"
+          onClick={() =>
+            setTheme((currentTheme) =>
+              currentTheme === "dark" ? "light" : "dark",
+            )
+          }
+          className="btn-secondary mt-4 inline-flex items-center gap-2"
+          aria-label={
+            theme === "dark"
+              ? "Passer en mode clair"
+              : "Passer en mode sombre"
+          }
+        >
+          {theme === "dark" ? (
+            <SunIcon className="h-4 w-4" />
+          ) : (
+            <MoonIcon className="h-4 w-4" />
+          )}
+          <span className="text-sm">
+            {theme === "dark" ? "Mode clair" : "Mode sombre"}
+          </span>
+        </button>
       </div>
     </header>
   );
