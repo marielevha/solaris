@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model PartnerAd {
+  id           String   @id @default(cuid())
+  active       Boolean  @default(true)
+  priority     Int      @default(0)
+
+  sponsorLabel String   @default("Sponsorisé")
+  title        String
+  description  String
+  cta          String
+  href         String
+  imageUrl     String?
+
+  placements   String
+
+  countries    String?
+  minPvKw      Float?
+  maxPvKw      Float?
+  voltages     String?
+  batteryTypes String?
+
+  impressions  Int      @default(0)
+  clicks       Int      @default(0)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  events       AdEvent[]
+}
+
+model AdEvent {
+  id        String    @id @default(cuid())
+  adId      String
+  ad        PartnerAd @relation(fields: [adId], references: [id], onDelete: Cascade)
+
+  type      String
+  placement String
+  ts        DateTime  @default(now())
+
+  country   String?
+  pvKw      Float?
+  voltage   Int?
+  battery   String?
+}
