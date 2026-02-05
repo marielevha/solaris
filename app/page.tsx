@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FiCopy, FiTrash2 } from "react-icons/fi";
 import { z } from "zod";
 import {
   computeBatteryBank,
@@ -62,6 +61,41 @@ const InfoBubble = ({ label }: { label: string }) => (
   >
     ?
   </span>
+);
+
+const CopyIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <rect x="9" y="9" width="10" height="10" rx="2" />
+    <rect x="5" y="5" width="10" height="10" rx="2" />
+  </svg>
+);
+
+const TrashIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </svg>
 );
 
 export default function Home() {
@@ -463,7 +497,7 @@ export default function Home() {
             title="Dupliquer"
             aria-label="Dupliquer"
           >
-            <FiCopy className="h-4 w-4" aria-hidden="true" />
+            <CopyIcon className="h-4 w-4" />
             <span className="sr-only">Dupliquer</span>
           </button>
           <button
@@ -473,7 +507,7 @@ export default function Home() {
             title="Supprimer"
             aria-label="Supprimer"
           >
-            <FiTrash2 className="h-4 w-4" aria-hidden="true" />
+            <TrashIcon className="h-4 w-4" />
             <span className="sr-only">Supprimer</span>
           </button>
         </div>
@@ -495,9 +529,16 @@ export default function Home() {
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-8">
-          <span className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">
-            Solaris
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <img
+              src="/solaris-congo-logo.svg"
+              alt="Logo Solaris Congo"
+              className="h-10 w-10"
+            />
+            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">
+              Solaris Congo
+            </span>
+          </div>
           <h1 className="text-3xl font-semibold text-slate-900">
             Dimensionnement solaire résidentiel
           </h1>

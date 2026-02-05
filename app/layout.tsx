@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Solaris · Dimensionnement solaire",
+  title: "Solaris Congo · Dimensionnement solaire",
   description:
     "Application de dimensionnement solaire domestique (batteries, PV, régulateur, onduleur).",
 };
